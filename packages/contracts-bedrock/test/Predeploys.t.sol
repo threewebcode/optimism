@@ -62,8 +62,8 @@ contract PredeploysTest is CommonTest {
             Predeploys.predeployToCodeNamespace(Predeploys.GAS_PRICE_ORACLE)
         );
         assertEq(
-            address(0xC0D3c0D3c0D3c0D3C0d3C0D3C0d3C0d3c0D31337),
-            Predeploys.predeployToCodeNamespace(address(0x4200000000000000000000000000000000001337))
+            address(0xC0d3C0d3c0d3c0d3C0d3c0D3c0D3c0D3C0d30420),
+            Predeploys.predeployToCodeNamespace(address(0x4200000000000000000000000000000000000420))
         );
     }
 
