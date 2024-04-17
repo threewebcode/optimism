@@ -2,12 +2,11 @@
 pragma solidity 0.8.15;
 
 import { Test } from "forge-std/Test.sol";
-import { L2Genesis } from "scripts/L2Genesis.s.sol";
+import { L2Genesis, OutputMode, L1Dependencies } from "scripts/L2Genesis.s.sol";
 import { console2 as console } from "forge-std/console2.sol";
 import { VmSafe } from "forge-std/Vm.sol";
 import { Predeploys } from "src/libraries/Predeploys.sol";
 import { stdJson } from "forge-std/StdJson.sol";
-import { LibString } from "@solady/utils/LibString.sol";
 import { Constants } from "src/libraries/Constants.sol";
 
 contract L2GenesisTest is Test {
@@ -74,6 +73,16 @@ contract L2GenesisTest is Test {
         commands[0] = "bash";
         commands[1] = "-c";
         commands[2] = string.concat("echo '", account, "' | jq -r '.balance'");
+        return vm.parseUint(string(vm.ffi(commands)));
+    }
+
+    function getStorageKeysCount(string memory _path, address _addr) internal returns (uint256) {
+        string[] memory commands = new string[](3);
+        commands[0] = "bash";
+        commands[1] = "-c";
+        commands[2] = string.concat("jq -r '.[\"",
+            vm.toLowercase(vm.toString(_addr)),
+            "\"].storage | length' < ", _path);
         return vm.parseUint(string(vm.ffi(commands)));
     }
 
@@ -181,11 +190,11 @@ contract L2GenesisTest is Test {
         return address(uint160(uint256(abi.decode(vm.ffi(commands), (bytes32)))));
     }
 
-    function testPredeployProxies() external {
-        withTempDump(_testPredeployProxies);
+    function test_genesis_predeploys() external {
+        withTempDump(_test_genesis_predeploys);
     }
 
-    function _testPredeployProxies(string memory _path) internal {
+    function _test_genesis_predeploys(string memory _path) internal {
         // Set the predeploy proxies into state
         genesis.setPredeployProxies();
         genesis.writeGenesisAllocs(_path);
@@ -204,59 +213,34 @@ contract L2GenesisTest is Test {
             Predeploys.PREDEPLOY_COUNT - 2
         );
 
-        // For each predeploy
-        assertEq(
-            0xc0D3C0d3C0d3C0D3c0d3C0d3c0D3C0d3c0d30000,
-            getImplementationAtAPath(_path, Predeploys.LEGACY_MESSAGE_PASSER)
-        );
-        // 1: legacy, not used in OP-Stack.
-        assertEq(
-            0xc0d3c0d3C0d3c0D3c0d3C0D3c0d3C0d3c0D30002, getImplementationAtAPath(_path, Predeploys.DEPLOYER_WHITELIST)
-        );
-        // 3,4,5: legacy, not used in OP-Stack.
-        // 6: WETH9, not behind a proxy
-        assertEq(
-            0xC0d3c0d3c0D3c0D3C0d3C0D3C0D3c0d3c0d30007,
-            getImplementationAtAPath(_path, Predeploys.L2_CROSS_DOMAIN_MESSENGER)
-        );
-        // 8,9,A,B,C,D,E: legacy, not used in OP-Stack.
-        assertEq(
-            0xc0d3C0d3C0d3c0D3C0D3C0d3C0d3C0D3C0D3000f, getImplementationAtAPath(_path, Predeploys.GAS_PRICE_ORACLE)
-        );
-        assertEq(
-            0xC0d3c0d3c0D3c0d3C0D3c0D3C0d3C0D3C0D30010, getImplementationAtAPath(_path, Predeploys.L2_STANDARD_BRIDGE)
-        );
-        assertEq(
-            0xC0D3C0d3c0d3c0d3C0D3c0d3C0D3c0d3c0D30011, getImplementationAtAPath(_path, Predeploys.SEQUENCER_FEE_WALLET)
-        );
-        assertEq(
-            0xc0D3c0d3C0d3c0d3c0D3c0d3c0D3c0D3c0D30012,
-            getImplementationAtAPath(_path, Predeploys.OPTIMISM_MINTABLE_ERC20_FACTORY)
-        );
-        assertEq(
-            0xC0D3C0d3C0D3c0D3C0d3c0D3C0d3c0d3C0d30013, getImplementationAtAPath(_path, Predeploys.L1_BLOCK_NUMBER)
-        );
-        assertEq(
-            0xC0D3c0d3c0d3c0d3c0D3C0d3C0D3C0D3c0d30014, getImplementationAtAPath(_path, Predeploys.L2_ERC721_BRIDGE)
-        );
-        assertEq(
-            0xc0d3C0D3C0D3c0D3C0D3C0d3C0D3c0D3c0d30015, getImplementationAtAPath(_path, Predeploys.L1_BLOCK_ATTRIBUTES)
-        );
-        assertEq(
-            0xC0D3C0d3C0d3c0d3C0d3C0D3c0D3c0d3c0D30016,
-            getImplementationAtAPath(_path, Predeploys.L2_TO_L1_MESSAGE_PASSER)
-        );
-        assertEq(
-            0xc0d3C0d3C0d3C0d3C0d3c0d3C0D3C0d3C0D30017,
-            getImplementationAtAPath(_path, Predeploys.OPTIMISM_MINTABLE_ERC721_FACTORY)
-        );
-        assertEq(0xC0d3C0D3c0d3C0d3c0d3c0D3C0D3C0d3C0D30018, getImplementationAtAPath(_path, Predeploys.PROXY_ADMIN));
-        assertEq(0xC0d3c0D3c0d3C0D3C0D3C0d3c0D3C0D3c0d30019, getImplementationAtAPath(_path, Predeploys.BASE_FEE_VAULT));
-        assertEq(0xc0D3c0D3C0d3c0d3c0d3C0d3c0d3C0d3C0D3001A, getImplementationAtAPath(_path, Predeploys.L1_FEE_VAULT));
-        // 1B,1C,1D,1E,1F: not used.
-        assertEq(
-            0xc0d3c0d3c0d3C0d3c0d3C0D3C0D3c0d3C0D30020, getImplementationAtAPath(_path, Predeploys.SCHEMA_REGISTRY)
-        );
-        assertEq(0xC0D3c0D3C0d3c0D3c0D3C0D3c0D3c0d3c0d30021, getImplementationAtAPath(_path, Predeploys.EAS));
+        // Also see Predeploys.t.test_predeploysSet_succeeds which uses L1Genesis for the CommonTest prestate.
+    }
+
+    function test_allocs_size() external {
+        withTempDump(_test_allocs_size);
+    }
+
+    function _dummyL1Deps() internal pure returns (L1Dependencies memory _deps) {
+        return L1Dependencies({
+            deployedL1CrossDomainMessengerProxy: payable(address(0x100000)),
+            deployedL1StandardBridgeProxy: payable(address(0x100001)),
+            deployedL1ERC721BridgeProxy: payable(address(0x100002))
+        });
+    }
+
+    function _test_allocs_size(string memory _path) internal {
+        genesis.runWithOptions(OutputMode.LOCAL_LATEST, _dummyL1Deps());
+        genesis.writeGenesisAllocs(_path);
+
+        uint256 expected = 0;
+        expected += 2048 - 2; // predeploy proxies
+        expected += 19;       // predeploy implementations (excl. legacy erc20-style eth and legacy message sender)
+        expected += 256;      // precompiles
+        expected += 12;       // preinstalls
+        // 9 prefunded dev accounts are excluded
+        assertEq(expected, getJSONKeyCount(_path), "key count check");
+
+        // 3 slots: implementation, owner, admin
+        assertEq(3, getStorageKeysCount(_path, Predeploys.PROXY_ADMIN), "proxy admin storage check");
     }
 }
