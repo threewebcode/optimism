@@ -80,9 +80,8 @@ contract L2GenesisTest is Test {
         string[] memory commands = new string[](3);
         commands[0] = "bash";
         commands[1] = "-c";
-        commands[2] = string.concat("jq -r '.[\"",
-            vm.toLowercase(vm.toString(_addr)),
-            "\"].storage | length' < ", _path);
+        commands[2] =
+            string.concat("jq -r '.[\"", vm.toLowercase(vm.toString(_addr)), "\"].storage | length' < ", _path);
         return vm.parseUint(string(vm.ffi(commands)));
     }
 
@@ -234,9 +233,9 @@ contract L2GenesisTest is Test {
 
         uint256 expected = 0;
         expected += 2048 - 2; // predeploy proxies
-        expected += 19;       // predeploy implementations (excl. legacy erc20-style eth and legacy message sender)
-        expected += 256;      // precompiles
-        expected += 12;       // preinstalls
+        expected += 19; // predeploy implementations (excl. legacy erc20-style eth and legacy message sender)
+        expected += 256; // precompiles
+        expected += 12; // preinstalls
         // 9 prefunded dev accounts are excluded
         assertEq(expected, getJSONKeyCount(_path), "key count check");
 

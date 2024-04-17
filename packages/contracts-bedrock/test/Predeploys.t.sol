@@ -35,25 +35,36 @@ contract PredeploysTest is CommonTest {
     }
 
     function _isInitializable(address _addr) internal pure returns (bool) {
-        return !(_addr == Predeploys.LEGACY_MESSAGE_PASSER || _addr == Predeploys.DEPLOYER_WHITELIST
-        || _addr == Predeploys.GAS_PRICE_ORACLE || _addr == Predeploys.SEQUENCER_FEE_WALLET
-        || _addr == Predeploys.BASE_FEE_VAULT || _addr == Predeploys.L1_FEE_VAULT
-            || _addr == Predeploys.L1_BLOCK_NUMBER || _addr == Predeploys.L1_BLOCK_ATTRIBUTES
-        || _addr == Predeploys.L2_TO_L1_MESSAGE_PASSER || _addr == Predeploys.OPTIMISM_MINTABLE_ERC721_FACTORY
-        || _addr == Predeploys.PROXY_ADMIN || _addr == Predeploys.SCHEMA_REGISTRY
-        || _addr == Predeploys.EAS || _addr == Predeploys.GOVERNANCE_TOKEN);
+        return !(
+            _addr == Predeploys.LEGACY_MESSAGE_PASSER || _addr == Predeploys.DEPLOYER_WHITELIST
+                || _addr == Predeploys.GAS_PRICE_ORACLE || _addr == Predeploys.SEQUENCER_FEE_WALLET
+                || _addr == Predeploys.BASE_FEE_VAULT || _addr == Predeploys.L1_FEE_VAULT
+                || _addr == Predeploys.L1_BLOCK_NUMBER || _addr == Predeploys.L1_BLOCK_ATTRIBUTES
+                || _addr == Predeploys.L2_TO_L1_MESSAGE_PASSER || _addr == Predeploys.OPTIMISM_MINTABLE_ERC721_FACTORY
+                || _addr == Predeploys.PROXY_ADMIN || _addr == Predeploys.SCHEMA_REGISTRY || _addr == Predeploys.EAS
+                || _addr == Predeploys.GOVERNANCE_TOKEN
+        );
     }
 
     function _usesImmutables(address _addr) internal pure returns (bool) {
         return _addr == Predeploys.OPTIMISM_MINTABLE_ERC721_FACTORY || _addr == Predeploys.SEQUENCER_FEE_WALLET
-        || _addr == Predeploys.BASE_FEE_VAULT || _addr == Predeploys.L1_FEE_VAULT
-        || _addr == Predeploys.EAS || _addr == Predeploys.GOVERNANCE_TOKEN;
+            || _addr == Predeploys.BASE_FEE_VAULT || _addr == Predeploys.L1_FEE_VAULT || _addr == Predeploys.EAS
+            || _addr == Predeploys.GOVERNANCE_TOKEN;
     }
 
     function test_predeployToCodeNamespace() external pure {
-        assertEq(address(0xc0D3C0d3C0d3C0D3c0d3C0d3c0D3C0d3c0d30000), Predeploys.predeployToCodeNamespace(Predeploys.LEGACY_MESSAGE_PASSER));
-        assertEq(address(0xc0d3C0d3C0d3c0D3C0D3C0d3C0d3C0D3C0D3000f), Predeploys.predeployToCodeNamespace(Predeploys.GAS_PRICE_ORACLE));
-        assertEq(address(0xC0D3c0D3c0D3c0D3C0d3C0D3C0d3C0d3c0D31337), Predeploys.predeployToCodeNamespace(address(0x4200000000000000000000000000000000001337)));
+        assertEq(
+            address(0xc0D3C0d3C0d3C0D3c0d3C0d3c0D3C0d3c0d30000),
+            Predeploys.predeployToCodeNamespace(Predeploys.LEGACY_MESSAGE_PASSER)
+        );
+        assertEq(
+            address(0xc0d3C0d3C0d3c0D3C0D3C0d3C0d3C0D3C0D3000f),
+            Predeploys.predeployToCodeNamespace(Predeploys.GAS_PRICE_ORACLE)
+        );
+        assertEq(
+            address(0xC0D3c0D3c0D3c0D3C0d3C0D3C0d3C0d3c0D31337),
+            Predeploys.predeployToCodeNamespace(address(0x4200000000000000000000000000000000001337))
+        );
     }
 
     /// @dev Tests that the predeploy addresses are set correctly. They have code
@@ -94,7 +105,8 @@ contract PredeploysTest is CommonTest {
             assertNotEq(supposedCode.length, 0, "must have supposed code");
 
             if (proxied == false) {
-                if (!_usesImmutables(addr)) { // can't check bytecode if it's modified with immutables in genesis.
+                if (!_usesImmutables(addr)) {
+                    // can't check bytecode if it's modified with immutables in genesis.
                     assertEq(code, supposedCode, "non-proxy contract should be deployed in-place");
                 }
                 console.log("predeploy %d is not a proxy", i);
@@ -113,7 +125,8 @@ contract PredeploysTest is CommonTest {
                 string.concat("Implementation mismatch for ", vm.toString(addr))
             );
             assertNotEq(implAddr.code.length, 0, "predeploy implementation account must have code");
-            if (!_usesImmutables(addr)) { // can't check bytecode if it's modified with immutables in genesis.
+            if (!_usesImmutables(addr)) {
+                // can't check bytecode if it's modified with immutables in genesis.
                 assertEq(implAddr.code, supposedCode, "proxy implementation contract should match contract source");
             }
 
@@ -126,8 +139,9 @@ contract PredeploysTest is CommonTest {
                 console.log("slot values: impl=%s, proxy=%s", uint256(implInitialized), uint256(proxyInitialized));
                 // TODO: should we be asserting a global initialized value as constant? Or can they differ?
                 // Storage packing causes some edge cases in this assertion
-//                assertNotEq(bytes32(0), implInitialized, "implementation must be initialized, even though behind a proxy");
-//                assertNotEq(bytes32(0), proxyInitialized , "proxy must be initialized");
+                //                assertNotEq(bytes32(0), implInitialized, "implementation must be initialized, even
+                // though behind a proxy");
+                //                assertNotEq(bytes32(0), proxyInitialized , "proxy must be initialized");
             }
         }
     }
