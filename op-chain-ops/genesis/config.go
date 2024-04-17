@@ -265,6 +265,9 @@ type DeployConfig struct {
 
 	// When Cancun activates. Relative to L1 genesis.
 	L1CancunTimeOffset *hexutil.Uint64 `json:"l1CancunTimeOffset,omitempty"`
+
+	// The interval, in seconds, during which a security council owner must have demonstrated liveness
+	LivenessModuleInterval uint64 `json:"livenessModuleInterval"`
 }
 
 // Copy will deeply copy the DeployConfig. This does a JSON roundtrip to copy
@@ -417,6 +420,9 @@ func (d *DeployConfig) Check() error {
 	}
 	if d.DisputeGameFinalityDelaySeconds == 0 {
 		log.Warn("DisputeGameFinalityDelaySeconds is 0")
+	}
+	if d.LivenessModuleInterval == 0 {
+		log.Warn("LivenessModuleInterval is 0")
 	}
 	if d.UsePlasma {
 		if d.DAChallengeWindow == 0 {
