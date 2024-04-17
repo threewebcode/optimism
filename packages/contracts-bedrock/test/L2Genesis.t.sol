@@ -221,9 +221,9 @@ contract L2GenesisTest is Test {
 
     function _dummyL1Deps() internal pure returns (L1Dependencies memory _deps) {
         return L1Dependencies({
-            deployedL1CrossDomainMessengerProxy: payable(address(0x100000)),
-            deployedL1StandardBridgeProxy: payable(address(0x100001)),
-            deployedL1ERC721BridgeProxy: payable(address(0x100002))
+            l1CrossDomainMessengerProxy: payable(address(0x100000)),
+            l1StandardBridgeProxy: payable(address(0x100001)),
+            l1ERC721BridgeProxy: payable(address(0x100002))
         });
     }
 

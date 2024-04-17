@@ -104,7 +104,6 @@ contract PreinstallsTest is CommonTest {
     }
 
     function test_preinstall_beaconBlockRoots_succeeds() external {
-        // TODO: this test fails with legacy genesis, due to missing 4788 contract there (no ecotone support).
-        // assertPreinstall(Preinstalls.BeaconBlockRoots, Preinstalls.BeaconBlockRootsCode);
+        assertPreinstall(Preinstalls.BeaconBlockRoots, Preinstalls.BeaconBlockRootsCode);
     }
 }

@@ -100,7 +100,7 @@ library Preinstalls {
         if (_addr == Permit2) return getPermit2Code(_chainID);
         if (_addr == BeaconBlockRoots) return BeaconBlockRootsCode;
 
-        revert("unknown preinstall");
+        revert("Preinstalls: unknown preinstall");
     }
 
     /// @notice Returns the name of the preinstall at the given address.
@@ -117,7 +117,7 @@ library Preinstalls {
         if (_addr == SenderCreator) return "SenderCreator";
         if (_addr == EntryPoint) return "EntryPoint";
         if (_addr == BeaconBlockRoots) return "BeaconBlockRoots";
-        revert("unnamed preinstall");
+        revert("Preinstalls: unnamed preinstall");
     }
 
     function getPermit2Code(uint256 _chainID) internal pure returns (bytes memory out_) {

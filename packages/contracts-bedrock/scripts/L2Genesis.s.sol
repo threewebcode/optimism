@@ -30,9 +30,9 @@ interface IInitializable {
 }
 
 struct L1Dependencies {
-    address payable deployedL1CrossDomainMessengerProxy;
-    address payable deployedL1StandardBridgeProxy;
-    address payable deployedL1ERC721BridgeProxy;
+    address payable l1CrossDomainMessengerProxy;
+    address payable l1StandardBridgeProxy;
+    address payable l1ERC721BridgeProxy;
 }
 
 /// @notice Enum representing different ways of outputting genesis allocs.
@@ -80,9 +80,9 @@ contract L2Genesis is Deployer {
     function artifactDependencies() internal view returns (L1Dependencies memory l1Dependencies_) {
         console.log("retrieving L1 deployments from artifacts");
         return L1Dependencies({
-            deployedL1CrossDomainMessengerProxy: mustGetAddress("L1CrossDomainMessengerProxy"),
-            deployedL1StandardBridgeProxy: mustGetAddress("L1StandardBridgeProxy"),
-            deployedL1ERC721BridgeProxy: mustGetAddress("L1ERC721BridgeProxy")
+            l1CrossDomainMessengerProxy: mustGetAddress("L1CrossDomainMessengerProxy"),
+            l1StandardBridgeProxy: mustGetAddress("L1StandardBridgeProxy"),
+            l1ERC721BridgeProxy: mustGetAddress("L1ERC721BridgeProxy")
         });
     }
 
@@ -167,14 +167,14 @@ contract L2Genesis is Deployer {
         setDeployerWhitelist(); // 2
         // 3,4,5: legacy, not used in OP-Stack.
         setWETH9(); // 6: WETH9 (not behind a proxy)
-        setL2CrossDomainMessenger(_l1Dependencies.deployedL1CrossDomainMessengerProxy); // 7
+        setL2CrossDomainMessenger(_l1Dependencies.l1CrossDomainMessengerProxy); // 7
         // 8,9,A,B,C,D,E: legacy, not used in OP-Stack.
         setGasPriceOracle(); // f
-        setL2StandardBridge(_l1Dependencies.deployedL1StandardBridgeProxy); // 10
+        setL2StandardBridge(_l1Dependencies.l1StandardBridgeProxy); // 10
         setSequencerFeeVault(); // 11
         setOptimismMintableERC20Factory(); // 12
         setL1BlockNumber(); // 13
-        setL2ERC721Bridge(_l1Dependencies.deployedL1ERC721BridgeProxy); // 14
+        setL2ERC721Bridge(_l1Dependencies.l1ERC721BridgeProxy); // 14
         setL1Block(); // 15
         setL2ToL1MessagePasser(); // 16
         setOptimismMintableERC721Factory(); // 17
@@ -202,34 +202,34 @@ contract L2Genesis is Deployer {
     }
 
     /// @notice This predeploy is following the safety invariant #1.
-    function setL2CrossDomainMessenger(address payable _deployedL1CrossDomainMessengerProxy) public {
+    function setL2CrossDomainMessenger(address payable _l1CrossDomainMessengerProxy) public {
         address impl = _setImplementationCode(Predeploys.L2_CROSS_DOMAIN_MESSENGER);
 
         L2CrossDomainMessenger(impl).initialize({ _l1CrossDomainMessenger: L1CrossDomainMessenger(address(0)) });
 
         L2CrossDomainMessenger(Predeploys.L2_CROSS_DOMAIN_MESSENGER).initialize({
-            _l1CrossDomainMessenger: L1CrossDomainMessenger(_deployedL1CrossDomainMessengerProxy)
+            _l1CrossDomainMessenger: L1CrossDomainMessenger(_l1CrossDomainMessengerProxy)
         });
     }
 
     /// @notice This predeploy is following the safety invariant #1.
-    function setL2StandardBridge(address payable _deployedL1StandardBridgeProxy) public {
+    function setL2StandardBridge(address payable _l1StandardBridgeProxy) public {
         address impl = _setImplementationCode(Predeploys.L2_STANDARD_BRIDGE);
 
         L2StandardBridge(payable(impl)).initialize({ _otherBridge: L1StandardBridge(payable(address(0))) });
 
         L2StandardBridge(payable(Predeploys.L2_STANDARD_BRIDGE)).initialize({
-            _otherBridge: L1StandardBridge(_deployedL1StandardBridgeProxy)
+            _otherBridge: L1StandardBridge(_l1StandardBridgeProxy)
         });
     }
 
     /// @notice This predeploy is following the safety invariant #1.
-    function setL2ERC721Bridge(address payable _deployedL1ERC721BridgeProxy) public {
+    function setL2ERC721Bridge(address payable _l1ERC721BridgeProxy) public {
         address impl = _setImplementationCode(Predeploys.L2_ERC721_BRIDGE);
 
         L2ERC721Bridge(impl).initialize({ _l1ERC721Bridge: payable(address(0)) });
 
-        L2ERC721Bridge(Predeploys.L2_ERC721_BRIDGE).initialize({ _l1ERC721Bridge: payable(_deployedL1ERC721BridgeProxy) });
+        L2ERC721Bridge(Predeploys.L2_ERC721_BRIDGE).initialize({ _l1ERC721Bridge: payable(_l1ERC721BridgeProxy) });
     }
 
     /// @notice This predeploy is following the safety invariant #2,
@@ -415,7 +415,7 @@ contract L2Genesis is Deployer {
         vm.resetNonce(address(eas));
     }
 
-    /// @dev Sets all the preinstalls.
+    /// @notice Sets all the preinstalls.
     function setPreinstalls() internal {
         _setPreinstallCode(Preinstalls.MultiCall3);
         _setPreinstallCode(Preinstalls.Create2Deployer);
@@ -432,12 +432,7 @@ contract L2Genesis is Deployer {
     }
 
     function activateEcotone() public {
-        bool hasBeaconBlockRoots = false;
-        address addr = Preinstalls.BeaconBlockRoots;
-        assembly {
-            hasBeaconBlockRoots := extcodesize(addr)
-        }
-        require(hasBeaconBlockRoots, "must have beacon-block-roots contract");
+        require(Preinstalls.BeaconBlockRoots.code.length > 0, "L2Genesis: must have beacon-block-roots contract");
         console.log("Activating ecotone in L1Block contract");
         vm.prank(L1Block(Predeploys.L1_BLOCK_ATTRIBUTES).DEPOSITOR_ACCOUNT());
         L1Block(Predeploys.L1_BLOCK_ATTRIBUTES).setL1BlockValuesEcotone();

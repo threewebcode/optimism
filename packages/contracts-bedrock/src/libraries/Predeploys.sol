@@ -85,7 +85,7 @@ library Predeploys {
 
     /// @notice Returns the name of the predeploy at the given address.
     function getName(address _addr) internal pure returns (string memory out_) {
-        require(isPredeployNamespace(_addr), "address must be a predeploy");
+        require(isPredeployNamespace(_addr), "Predeploys: address must be a predeploy");
         if (_addr == LEGACY_MESSAGE_PASSER) return "LegacyMessagePasser";
         if (_addr == L1_MESSAGE_SENDER) return "L1MessageSender";
         if (_addr == DEPLOYER_WHITELIST) return "DeployerWhitelist";
@@ -107,7 +107,7 @@ library Predeploys {
         if (_addr == EAS) return "EAS";
         if (_addr == GOVERNANCE_TOKEN) return "GovernanceToken";
         if (_addr == LEGACY_ERC20_ETH) return "LegacyERC20ETH";
-        revert("unnamed predeploy");
+        revert("Predeploys: unnamed predeploy");
     }
 
     /// @notice Returns true if the predeploy is not proxied.
@@ -132,7 +132,9 @@ library Predeploys {
     /// @notice Function to compute the expected address of the predeploy implementation
     ///         in the genesis state.
     function predeployToCodeNamespace(address _addr) internal pure returns (address) {
-        require(isPredeployNamespace(_addr), "can only derive code-namespace address for predeploy addresses");
+        require(
+            isPredeployNamespace(_addr), "Predeploys: can only derive code-namespace address for predeploy addresses"
+        );
         return address(
             uint160(uint256(uint160(_addr)) & 0xffff | uint256(uint160(0xc0D3C0d3C0d3C0D3c0d3C0d3c0D3C0d3c0d30000)))
         );
