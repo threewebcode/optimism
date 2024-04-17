@@ -103,7 +103,7 @@ contract PreinstallsTest is CommonTest {
         assertPreinstall(Preinstalls.EntryPoint, Preinstalls.EntryPointCode);
     }
 
-    function test_preinstall_beaconBlockRoots_succeeds() external {
+    function test_preinstall_beaconBlockRoots_succeeds() external view {
         assertPreinstall(Preinstalls.BeaconBlockRoots, Preinstalls.BeaconBlockRootsCode);
     }
 }
