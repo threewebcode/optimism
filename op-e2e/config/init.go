@@ -112,6 +112,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	L2Allocs = make(map[genesis.L2AllocsMode]*genesis.ForgeAllocs)
 	mustL2Allocs := func(mode genesis.L2AllocsMode) {
 		name := "allocs-l2"
 		if mode != "" {
