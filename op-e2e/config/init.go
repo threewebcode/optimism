@@ -44,8 +44,8 @@ var (
 	// L1Deployments maps contract names to accounts in the L1
 	// genesis block state.
 	L1Deployments *genesis.L1Deployments
-	// L2Allocs represents the L2 allocs, by hardfork/mode (e.g. delta, ecotone, interop, other)
-	L2Allocs map[genesis.L2AllocsMode]*genesis.ForgeAllocs
+	// l2Allocs represents the L2 allocs, by hardfork/mode (e.g. delta, ecotone, interop, other)
+	l2Allocs map[genesis.L2AllocsMode]*genesis.ForgeAllocs
 	// DeployConfig represents the deploy config used by the system.
 	DeployConfig *genesis.DeployConfig
 	// ExternalL2Shim is the shim to use if external ethereum client testing is
@@ -112,7 +112,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	L2Allocs = make(map[genesis.L2AllocsMode]*genesis.ForgeAllocs)
+	l2Allocs = make(map[genesis.L2AllocsMode]*genesis.ForgeAllocs)
 	mustL2Allocs := func(mode genesis.L2AllocsMode) {
 		name := "allocs-l2"
 		if mode != "" {
@@ -122,7 +122,7 @@ func init() {
 		if err != nil {
 			panic(err)
 		}
-		L2Allocs[mode] = allocs
+		l2Allocs[mode] = allocs
 	}
 	mustL2Allocs(genesis.L2AllocsEcotone)
 	mustL2Allocs(genesis.L2AllocsDelta)
@@ -154,6 +154,14 @@ func init() {
 			panic(fmt.Errorf("could not initialize external L2: %w", err))
 		}
 	}
+}
+
+func L2Allocs(mode genesis.L2AllocsMode) *genesis.ForgeAllocs {
+	allocs, ok := l2Allocs[mode]
+	if !ok {
+		panic(fmt.Errorf("unknown L2 allocs mode: %q", mode))
+	}
+	return allocs.Copy()
 }
 
 func initExternalL2(externalL2 string) error {

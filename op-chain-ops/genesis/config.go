@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"reflect"
 
+	"golang.org/x/exp/maps"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/consensus/misc/eip4844"
@@ -818,6 +820,12 @@ func (d *ForgeDump) UnmarshalJSON(b []byte) error {
 
 type ForgeAllocs struct {
 	Accounts core.GenesisAlloc `json:"accounts"`
+}
+
+func (d *ForgeAllocs) Copy() *ForgeAllocs {
+	out := make(core.GenesisAlloc, len(d.Accounts))
+	maps.Copy(out, d.Accounts)
+	return &ForgeAllocs{Accounts: out}
 }
 
 func (d *ForgeAllocs) UnmarshalJSON(b []byte) error {
