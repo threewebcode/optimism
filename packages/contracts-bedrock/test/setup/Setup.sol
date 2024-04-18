@@ -9,6 +9,7 @@ import { L2ERC721Bridge } from "src/L2/L2ERC721Bridge.sol";
 import { BaseFeeVault } from "src/L2/BaseFeeVault.sol";
 import { SequencerFeeVault } from "src/L2/SequencerFeeVault.sol";
 import { L1FeeVault } from "src/L2/L1FeeVault.sol";
+import { RevenueSharer } from "src/L2/RevenueSharer.sol";
 import { GasPriceOracle } from "src/L2/GasPriceOracle.sol";
 import { L1Block } from "src/L2/L1Block.sol";
 import { LegacyMessagePasser } from "src/legacy/LegacyMessagePasser.sol";
@@ -77,6 +78,7 @@ contract Setup {
     BaseFeeVault baseFeeVault = BaseFeeVault(payable(Predeploys.BASE_FEE_VAULT));
     SequencerFeeVault sequencerFeeVault = SequencerFeeVault(payable(Predeploys.SEQUENCER_FEE_WALLET));
     L1FeeVault l1FeeVault = L1FeeVault(payable(Predeploys.L1_FEE_VAULT));
+    RevenueSharer revenueSharer = RevenueSharer(Predeploys.REVENUE_SHARER);
     GasPriceOracle gasPriceOracle = GasPriceOracle(Predeploys.GAS_PRICE_ORACLE);
     L1Block l1Block = L1Block(Predeploys.L1_BLOCK_ATTRIBUTES);
     LegacyMessagePasser legacyMessagePasser = LegacyMessagePasser(Predeploys.LEGACY_MESSAGE_PASSER);
@@ -201,6 +203,7 @@ contract Setup {
         vm.label(Predeploys.L2_ERC721_BRIDGE, "L2ERC721Bridge");
         vm.label(Predeploys.BASE_FEE_VAULT, "BaseFeeVault");
         vm.label(Predeploys.L1_FEE_VAULT, "L1FeeVault");
+        vm.label(Predeploys.REVENUE_SHARER, "RevenueSharer");
         vm.label(Predeploys.L1_BLOCK_ATTRIBUTES, "L1Block");
         vm.label(Predeploys.GAS_PRICE_ORACLE, "GasPriceOracle");
         vm.label(Predeploys.LEGACY_MESSAGE_PASSER, "LegacyMessagePasser");
