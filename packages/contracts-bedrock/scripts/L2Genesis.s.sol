@@ -12,6 +12,7 @@ import { Predeploys } from "src/libraries/Predeploys.sol";
 import { Preinstalls } from "src/libraries/Preinstalls.sol";
 import { L2CrossDomainMessenger } from "src/L2/L2CrossDomainMessenger.sol";
 import { L1Block } from "src/L2/L1Block.sol";
+import { GasPriceOracle } from "src/L2/GasPriceOracle.sol";
 import { L2StandardBridge } from "src/L2/L2StandardBridge.sol";
 import { L2ERC721Bridge } from "src/L2/L2ERC721Bridge.sol";
 import { SequencerFeeVault } from "src/L2/SequencerFeeVault.sol";
@@ -449,9 +450,9 @@ contract L2Genesis is Deployer {
 
     function activateEcotone() public {
         require(Preinstalls.BeaconBlockRoots.code.length > 0, "L2Genesis: must have beacon-block-roots contract");
-        console.log("Activating ecotone in L1Block contract");
+        console.log("Activating ecotone in GasPriceOracle contract");
         vm.prank(L1Block(Predeploys.L1_BLOCK_ATTRIBUTES).DEPOSITOR_ACCOUNT());
-        L1Block(Predeploys.L1_BLOCK_ATTRIBUTES).setL1BlockValuesEcotone();
+        GasPriceOracle(Predeploys.GAS_PRICE_ORACLE).setEcotone();
     }
 
     /// @notice Sets the bytecode in state
