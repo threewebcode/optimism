@@ -166,6 +166,7 @@ contract L2Genesis is Script, Artifacts {
         _setGasPriceOracle();
         _setGovernanceToken();
         _setL1Block();
+        _setRevenueSharer();
     }
 
     /// @notice This predeploy is following the saftey invariant #1.
