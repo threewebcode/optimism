@@ -26,7 +26,6 @@ import (
 func TestMissingGasLimit(t *testing.T) {
 	InitParallel(t)
 	cfg := DefaultSystemConfig(t)
-	cfg.DeployConfig.FundDevAccounts = false
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 	opGeth, err := NewOpGeth(t, ctx, &cfg)
