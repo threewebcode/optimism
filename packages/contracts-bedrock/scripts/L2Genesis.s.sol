@@ -60,7 +60,9 @@ contract L2Genesis is Deployer {
     uint80 internal constant DEV_ACCOUNT_FUND_AMT = 10_000 ether;
 
     /// @notice Default Anvil dev accounts. Only funded if `cfg.fundDevAccounts == true`.
-    address[10] internal devAccounts = [
+    /// Also known as "test test test test test test test test test test test junk" mnemonic accounts,
+    /// on path "m/44'/60'/0'/0/i" (where i is the account index).
+    address[16] internal devAccounts = [
         0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266,
         0x70997970C51812dc3A010C7d01b50e0d17dc79C8,
         0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC,
@@ -70,7 +72,13 @@ contract L2Genesis is Deployer {
         0x976EA74026E726554dB657fA54763abd0C3a0aa9,
         0x14dC79964da2C08b23698B3D3cc7Ca32193d9955,
         0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f,
-        0xa0Ee7A142d267C1f36714E4a8F75612F20a79720
+        0xa0Ee7A142d267C1f36714E4a8F75612F20a79720,
+        0xbDA5747bFD65F08deb54cb465eB87D40e51B197E,
+        0xcd3B766CCDd6AE721141F452C550Ca635964ce71,
+        0xdD2FD4581271e230360230F9337D5c0430Bf44C0,
+        0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097,
+        0xDe3829A23DF1479438622a08a116E8Eb3f620BB5,
+        0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
     ];
 
     function name() public pure override returns (string memory) {

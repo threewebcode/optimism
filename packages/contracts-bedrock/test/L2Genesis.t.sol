@@ -236,7 +236,7 @@ contract L2GenesisTest is Test {
         expected += 19; // predeploy implementations (excl. legacy erc20-style eth and legacy message sender)
         expected += 256; // precompiles
         expected += 12; // preinstalls
-        // 9 prefunded dev accounts are excluded
+        // 16 prefunded dev accounts are excluded
         assertEq(expected, getJSONKeyCount(_path), "key count check");
 
         // 3 slots: implementation, owner, admin
