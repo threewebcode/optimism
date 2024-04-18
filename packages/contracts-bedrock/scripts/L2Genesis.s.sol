@@ -12,11 +12,13 @@ import { L1CrossDomainMessenger } from "src/L1/L1CrossDomainMessenger.sol";
 import { L2StandardBridge } from "src/L2/L2StandardBridge.sol";
 import { L2CrossDomainMessenger } from "src/L2/L2CrossDomainMessenger.sol";
 import { SequencerFeeVault } from "src/L2/SequencerFeeVault.sol";
+import { RevenueSharer } from "src/L2/RevenueSharer.sol";
 import { FeeVault } from "src/universal/FeeVault.sol";
 import { OptimismMintableERC20Factory } from "src/universal/OptimismMintableERC20Factory.sol";
 import { L1Block } from "src/L2/L1Block.sol";
 import { GovernanceToken } from "src/governance/GovernanceToken.sol";
 import { EIP1967Helper } from "test/mocks/EIP1967Helper.sol";
+import { Proxy } from "src/universal/Proxy.sol";
 
 interface IInitializable {
     function initialize(address _addr) external;
@@ -30,7 +32,7 @@ interface IInitializable {
 ///      2. `vm.etch` sets the deployed bytecode for each predeploy at the implementation address (i.e. `0xc0d3`
 /// namespace).
 ///      3. The `initialize` method is called at the implementation address with zero/dummy vaules if the method exists.
-///      4. The `initialize` method is called at the proxy address with actual vaules if the method exists.
+///      4. The `initialize` method is called at the proxy address with actual values if the method exists.
 ///      5. A `require` check to verify the expected implementation address is set for the proxy.
 /// @notice The following safety invariants are used when setting state:
 ///         1. `vm.getDeployedBytecode` can only be used with `vm.etch` when there are no side
@@ -261,6 +263,27 @@ contract L2Genesis is Script, Artifacts {
         _checkSequencerFeeVault(impl);
     }
 
+    /// @notice This predeploy is following the saftey invariant #2,
+    ///         because the constructor args are non-static L1 contract
+    ///         addresses that are being read from the deploy config
+    ///         that are set as immutables.
+    /// @dev Because the constructor args are stored as immutables,
+    ///      we don't have to worry about setting storage slots.
+    function _setRevenueSharer() internal {
+        RevenueSharer rs = new RevenueSharer(cfg.revenueShareRecipient(), cfg.revenueShareRemainderRecipient());
+
+        address impl = _predeployToCodeNamespace(Predeploys.REVENUE_SHARER);
+        console.log("Setting %s implementation at: %s", "RevenueSharer", impl);
+        vm.etch(impl, address(rs).code);
+
+        /// Reset so its not included state dump
+        vm.etch(address(rs), "");
+        vm.resetNonce(address(rs));
+
+        Proxy(Predeploys.REVENUE_SHARER).upgradeTo(impl);
+        _checkRevenueSharer(impl);
+    }
+
     /// @notice This predeploy is following the saftey invariant #1.
     ///         We're initializing the implementation with `address(0)` so
     ///         it's not left uninitialized. After `initialize` is called on the
@@ -336,7 +359,8 @@ contract L2Genesis is Script, Artifacts {
             || _addr == Predeploys.GAS_PRICE_ORACLE || _addr == Predeploys.DEPLOYER_WHITELIST || _addr == Predeploys.WETH9
             || _addr == Predeploys.L1_BLOCK_NUMBER || _addr == Predeploys.LEGACY_MESSAGE_PASSER
             || _addr == Predeploys.PROXY_ADMIN || _addr == Predeploys.BASE_FEE_VAULT || _addr == Predeploys.L1_FEE_VAULT
-            || _addr == Predeploys.GOVERNANCE_TOKEN || _addr == Predeploys.SCHEMA_REGISTRY || _addr == Predeploys.EAS;
+            || _addr == Predeploys.GOVERNANCE_TOKEN || _addr == Predeploys.SCHEMA_REGISTRY || _addr == Predeploys.EAS
+            || _addr == Predeploys.REVENUE_SHARER;
     }
 
     /// @dev Function to compute the expected address of the predeploy implementation
@@ -406,6 +430,10 @@ contract L2Genesis is Script, Artifacts {
 
     function _checkSequencerFeeVault(address _impl) internal view {
         _verifyProxyImplementationAddress(Predeploys.SEQUENCER_FEE_WALLET, _impl);
+    }
+
+    function _checkRevenueSharer(address _impl) internal view {
+        _verifyProxyImplementationAddress(Predeploys.REVENUE_SHARER, _impl);
     }
 
     function _checkOptimismMintableERC20Factory(address _impl) internal {
