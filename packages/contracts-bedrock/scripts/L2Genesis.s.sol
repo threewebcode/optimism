@@ -63,23 +63,37 @@ contract L2Genesis is Deployer {
     /// @notice Default Anvil dev accounts. Only funded if `cfg.fundDevAccounts == true`.
     /// Also known as "test test test test test test test test test test test junk" mnemonic accounts,
     /// on path "m/44'/60'/0'/0/i" (where i is the account index).
-    address[16] internal devAccounts = [
-        0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266,
-        0x70997970C51812dc3A010C7d01b50e0d17dc79C8,
-        0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC,
-        0x90F79bf6EB2c4f870365E785982E1f101E93b906,
-        0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65,
-        0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc,
-        0x976EA74026E726554dB657fA54763abd0C3a0aa9,
-        0x14dC79964da2C08b23698B3D3cc7Ca32193d9955,
-        0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f,
-        0xa0Ee7A142d267C1f36714E4a8F75612F20a79720,
-        0xbDA5747bFD65F08deb54cb465eB87D40e51B197E,
-        0xcd3B766CCDd6AE721141F452C550Ca635964ce71,
-        0xdD2FD4581271e230360230F9337D5c0430Bf44C0,
-        0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097,
-        0xDe3829A23DF1479438622a08a116E8Eb3f620BB5,
-        0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+    address[30] internal devAccounts = [
+        0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266, // 0
+        0x70997970C51812dc3A010C7d01b50e0d17dc79C8, // 1
+        0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC, // 2
+        0x90F79bf6EB2c4f870365E785982E1f101E93b906, // 3
+        0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65, // 4
+        0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc, // 5
+        0x976EA74026E726554dB657fA54763abd0C3a0aa9, // 6
+        0x14dC79964da2C08b23698B3D3cc7Ca32193d9955, // 7
+        0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f, // 8
+        0xa0Ee7A142d267C1f36714E4a8F75612F20a79720, // 9
+        0xBcd4042DE499D14e55001CcbB24a551F3b954096, // 10
+        0x71bE63f3384f5fb98995898A86B02Fb2426c5788, // 11
+        0xFABB0ac9d68B0B445fB7357272Ff202C5651694a, // 12
+        0x1CBd3b2770909D4e10f157cABC84C7264073C9Ec, // 13
+        0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097, // 14
+        0xcd3B766CCDd6AE721141F452C550Ca635964ce71, // 15
+        0x2546BcD3c84621e976D8185a91A922aE77ECEc30, // 16
+        0xbDA5747bFD65F08deb54cb465eB87D40e51B197E, // 17
+        0xdD2FD4581271e230360230F9337D5c0430Bf44C0, // 18
+        0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199, // 19
+        0x09DB0a93B389bEF724429898f539AEB7ac2Dd55f, // 20
+        0x02484cb50AAC86Eae85610D6f4Bf026f30f6627D, // 21
+        0x08135Da0A343E492FA2d4282F2AE34c6c5CC1BbE, // 22
+        0x5E661B79FE2D3F6cE70F5AAC07d8Cd9abb2743F1, // 23
+        0x61097BA76cD906d2ba4FD106E757f7Eb455fc295, // 24
+        0xDf37F81dAAD2b0327A0A50003740e1C935C70913, // 25
+        0x553BC17A05702530097c3677091C5BB47a3a7931, // 26
+        0x87BdCE72c06C21cd96219BD8521bDF1F42C78b5e, // 27
+        0x40Fc963A729c542424cD800349a7E4Ecc4896624, // 28
+        0x9DCCe783B6464611f38631e6C851bf441907c710 // 29
     ];
 
     function name() public pure override returns (string memory) {
@@ -141,6 +155,7 @@ contract L2Genesis is Deployer {
     ///      The Proxy bytecode should be set. All proxied predeploys should have
     ///      the 1967 admin slot set to the ProxyAdmin predeploy. All defined predeploys
     ///      should have their implementations set.
+    ///      Warning: the predeploy accounts have contract code, but 0 nonce value.
     function setPredeployProxies() public {
         console.log("Setting Predeploy proxies");
         bytes memory code = vm.getDeployedCode("Proxy.sol:Proxy");
@@ -433,6 +448,10 @@ contract L2Genesis is Deployer {
     }
 
     /// @notice Sets all the preinstalls.
+    ///         Warning: the creator-accounts of the preinstall contracts have 0 nonce values.
+    ///         When performing a regular user-initiated contract-creation of a preinstall,
+    ///         the creation will fail (but nonce will be bumped and not blocked).
+    ///         The preinstalls themselves are all inserted with a nonce of 1, reflecting regular user execution.
     function setPreinstalls() internal {
         _setPreinstallCode(Preinstalls.MultiCall3);
         _setPreinstallCode(Preinstalls.Create2Deployer);
@@ -446,6 +465,10 @@ contract L2Genesis is Deployer {
         _setPreinstallCode(Preinstalls.SenderCreator);
         _setPreinstallCode(Preinstalls.EntryPoint); // ERC 4337
         _setPreinstallCode(Preinstalls.BeaconBlockRoots);
+        // 4788 sender nonce must be incremented, since it's part of later upgrade-transactions.
+        // For the upgrade-tx to not create a contract that conflicts with an already-existing copy,
+        // the nonce must be bumped.
+        vm.setNonce(Preinstalls.BeaconBlockRootsSender, 1);
     }
 
     function activateEcotone() public {
@@ -469,6 +492,7 @@ contract L2Genesis is Deployer {
         string memory cname = Preinstalls.getName(_addr);
         console.log("Setting %s preinstall code at: %s", cname, _addr);
         vm.etch(_addr, Preinstalls.getDeployedCode(_addr, cfg.l2ChainID()));
+        vm.setNonce(_addr, 1);
     }
 
     /// @notice Writes the genesis allocs, i.e. the state dump, to disk

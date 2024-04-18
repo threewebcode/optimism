@@ -43,6 +43,11 @@ library Preinstalls {
     ///         This contract is introduced in L2 through an Ecotone upgrade transaction, if not already in genesis.
     address internal constant BeaconBlockRoots = 0x000F3df6D732807Ef1319fB7B8bB8522d0Beac02;
 
+    /// @notice See https://eips.ethereum.org/EIPS/eip-4788, this is the address of the sender of the deployment tx.
+    /// The nonce of this account must be non-zero, to ensure the Ecotone upgrade tx is still successful
+    /// if the code is already in place.
+    address internal constant BeaconBlockRootsSender = 0x0B799C86a49DEeb90402691F1041aa3AF2d3C875;
+
     // @notice Permit2 code is templated. The template is a copy of the Mainnet Ethereum L1 Permit2 deployment.
     //         This deployed bytecode contains two immutable values _CACHED_CHAIN_ID and _CACHED_DOMAIN_SEPARATOR,
     //         which depend on the chain-ID (the domain-separator is computed with the chain-ID as input).

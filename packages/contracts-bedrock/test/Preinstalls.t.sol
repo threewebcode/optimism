@@ -54,6 +54,7 @@ contract PreinstallsTest is CommonTest {
         assertEq(_addr.code, _code, "equal code must be deployed");
         assertEq(Preinstalls.getDeployedCode(_addr, block.chainid), _code, "deployed-code getter must match");
         assertNotEq(Preinstalls.getName(_addr), "", "must have a name");
+        assertEq(vm.getNonce(_addr), 1, "preinstall account must have 1 nonce");
     }
 
     function test_preinstall_multicall3_succeeds() external view {
@@ -105,5 +106,6 @@ contract PreinstallsTest is CommonTest {
 
     function test_preinstall_beaconBlockRoots_succeeds() external view {
         assertPreinstall(Preinstalls.BeaconBlockRoots, Preinstalls.BeaconBlockRootsCode);
+        assertEq(vm.getNonce(Preinstalls.BeaconBlockRootsSender), 1, "4788 sender must have nonce=1");
     }
 }
