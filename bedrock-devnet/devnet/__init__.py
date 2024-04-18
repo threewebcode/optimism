@@ -173,6 +173,7 @@ def devnet_l2_allocs(paths):
         output_path = pjoin(paths.devnet_dir, f'allocs-l2{suffix}.json')
         write_json(output_path, { "accounts": forge_dump })
         os.remove(input_path)
+        log.info("Generated L2 allocs: "+output_path)
 
 
 # Bring up the devnet where the contracts are deployed to L1
@@ -181,7 +182,7 @@ def devnet_deploy(paths):
         log.info('L1 genesis already generated.')
     else:
         log.info('Generating L1 genesis.')
-        if os.path.exists(paths.allocs_l1_path) == False or DEVNET_FPAC == True:
+        if os.path.exists(paths.allocs_l1_path) == False or DEVNET_FPAC == True or DEVNET_PLASMA == True:
             # If this is the FPAC devnet then we need to generate the allocs
             # file here always. This is because CI will run devnet-allocs
             # without DEVNET_FPAC=true which means the allocs will be wrong.
