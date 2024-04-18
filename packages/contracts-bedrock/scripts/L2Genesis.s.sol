@@ -130,6 +130,7 @@ contract L2Genesis is Deployer {
 
     /// @notice Give all of the precompiles 1 wei
     function dealEthToPrecompiles() internal {
+        console.log("Setting precompile 1 wei balances");
         for (uint256 i; i < PRECOMPILE_COUNT; i++) {
             vm.deal(address(uint160(i)), 1);
         }
@@ -140,6 +141,7 @@ contract L2Genesis is Deployer {
     ///      the 1967 admin slot set to the ProxyAdmin predeploy. All defined predeploys
     ///      should have their implementations set.
     function setPredeployProxies() public {
+        console.log("Setting Predeploy proxies");
         bytes memory code = vm.getDeployedCode("Proxy.sol:Proxy");
         uint160 prefix = uint160(0x420) << 148;
 
@@ -170,6 +172,10 @@ contract L2Genesis is Deployer {
     ///      sets the deployed bytecode at their expected predeploy address.
     ///      LEGACY_ERC20_ETH and L1_MESSAGE_SENDER are deprecated and are not set.
     function setPredeployImplementations(L1Dependencies memory _l1Dependencies) internal {
+        console.log("Setting predeploy implementations, with L1 contract dependencies:");
+        console.log("- l1CrossDomainMessengerProxy: %s", _l1Dependencies.l1CrossDomainMessengerProxy);
+        console.log("- l1StandardBridgeProxy: %s", _l1Dependencies.l1StandardBridgeProxy);
+        console.log("- l1ERC721BridgeProxy: %s", _l1Dependencies.l1ERC721BridgeProxy);
         setLegacyMessagePasser(); // 0
         // 01: legacy, not used in OP-Stack
         setDeployerWhitelist(); // 2
