@@ -64,7 +64,6 @@ def main():
     contracts_bedrock_dir = pjoin(monorepo_dir, 'packages', 'contracts-bedrock')
     deployment_dir = pjoin(contracts_bedrock_dir, 'deployments', 'devnetL1')
     forge_l1_dump_path = pjoin(contracts_bedrock_dir, 'state-dump-900.json')
-    forge_l2_dump_path = pjoin(contracts_bedrock_dir, 'state-dump-901.json')
     op_node_dir = pjoin(args.monorepo_dir, 'op-node')
     ops_bedrock_dir = pjoin(monorepo_dir, 'ops-bedrock')
     deploy_config_dir = pjoin(contracts_bedrock_dir, 'deploy-config')
@@ -79,7 +78,6 @@ def main():
       contracts_bedrock_dir=contracts_bedrock_dir,
       deployment_dir=deployment_dir,
       forge_l1_dump_path=forge_l1_dump_path,
-      forge_l2_dump_path=forge_l2_dump_path,
       l1_deployments_path=pjoin(deployment_dir, '.deploy'),
       deploy_config_dir=deploy_config_dir,
       devnet_config_path=devnet_config_path,
@@ -91,7 +89,6 @@ def main():
       genesis_l1_path=pjoin(devnet_dir, 'genesis-l1.json'),
       genesis_l2_path=pjoin(devnet_dir, 'genesis-l2.json'),
       allocs_l1_path=pjoin(devnet_dir, 'allocs-l1.json'),
-      allocs_l2_path=pjoin(devnet_dir, 'allocs-l2.json'),
       addresses_json_path=pjoin(devnet_dir, 'addresses.json'),
       sdk_addresses_json_path=pjoin(devnet_dir, 'sdk-addresses.json'),
       rollup_config_path=pjoin(devnet_dir, 'rollup.json')
@@ -163,14 +160,19 @@ def devnet_l2_allocs(paths):
     fqn = 'scripts/L2Genesis.s.sol:L2Genesis'
     # Use foundry pre-funded account #1 for the deployer
     run_command([
-        'forge', 'script', '--chain-id', '901', fqn, "--sig", "runWithStateDump()", "--private-key", "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        'forge', 'script', '--chain-id', '901', fqn, "--sig", "runWithAllUpgrades()", "--private-key", "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
     ], env={
       'CONTRACT_ADDRESSES_PATH': paths.l1_deployments_path,
     }, cwd=paths.contracts_bedrock_dir)
 
-    forge_dump = read_json(paths.forge_l2_dump_path)
-    write_json(paths.allocs_l2_path, { "accounts": forge_dump })
-    os.remove(paths.forge_l2_dump_path)
+    # For the previous forks, and the latest fork (default, thus empty prefix),
+    # move the forge-dumps into place as .devnet allocs.
+    for suffix in ["-delta", ""]:
+        input_path = pjoin(paths.contracts_bedrock_dir, f"state-dump-901{suffix}.json")
+        forge_dump = read_json(input_path)
+        output_path = pjoin(paths.devnet_dir, f'allocs-l2{suffix}.json')
+        write_json(output_path, { "accounts": forge_dump })
+        os.remove(input_path)
 
 
 # Bring up the devnet where the contracts are deployed to L1
@@ -213,7 +215,8 @@ def devnet_deploy(paths):
         log.info('L2 genesis and rollup configs already generated.')
     else:
         log.info('Generating L2 genesis and rollup configs.')
-        if os.path.exists(paths.allocs_l2_path) == False or DEVNET_FPAC == True:
+        l2_allocs_path = pjoin(paths.devnet_dir, 'allocs-l2.json')
+        if os.path.exists(l2_allocs_path) == False or DEVNET_FPAC == True:
             # Also regenerate if FPAC.
             # The FPAC flag may affect the L1 deployments addresses, which may affect the L2 genesis.
             devnet_l2_allocs(paths)
@@ -224,7 +227,7 @@ def devnet_deploy(paths):
             'go', 'run', 'cmd/main.go', 'genesis', 'l2',
             '--l1-rpc', 'http://localhost:8545',
             '--deploy-config', paths.devnet_config_path,
-            '--l2-allocs', paths.allocs_l2_path,
+            '--l2-allocs', l2_allocs_path,
             '--l1-deployments', paths.addresses_json_path,
             '--outfile.l2', paths.genesis_l2_path,
             '--outfile.rollup', paths.rollup_config_path

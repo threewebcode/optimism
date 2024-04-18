@@ -113,7 +113,7 @@ func init() {
 		panic(err)
 	}
 	mustL2Allocs := func(mode genesis.L2AllocsMode) {
-		name := "l2-allocs"
+		name := "allocs-l2"
 		if mode != "" {
 			name += "-" + string(mode)
 		}
