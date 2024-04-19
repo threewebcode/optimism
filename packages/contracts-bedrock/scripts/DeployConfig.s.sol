@@ -47,6 +47,8 @@ contract DeployConfig is Script {
     uint256 public l2GenesisBlockBaseFeePerGas;
     uint256 public gasPriceOracleOverhead;
     uint256 public gasPriceOracleScalar;
+    uint32 public basefeeScalar;
+    uint32 public blobbasefeeScalar;
     bool public enableGovernance;
     uint256 public eip1559Denominator;
     uint256 public eip1559Elasticity;
@@ -114,6 +116,9 @@ contract DeployConfig is Script {
         l2GenesisBlockBaseFeePerGas = stdJson.readUint(_json, "$.l2GenesisBlockBaseFeePerGas");
         gasPriceOracleOverhead = stdJson.readUint(_json, "$.gasPriceOracleOverhead");
         gasPriceOracleScalar = stdJson.readUint(_json, "$.gasPriceOracleScalar");
+        basefeeScalar = uint32(stdJson.readUint(_json, "$.gasPriceOracleBaseFeeScalar"));
+        blobbasefeeScalar = uint32(stdJson.readUint(_json, "$.gasPriceOracleBlobBaseFeeScalar"));
+
         enableGovernance = stdJson.readBool(_json, "$.enableGovernance");
         eip1559Denominator = stdJson.readUint(_json, "$.eip1559Denominator");
         eip1559Elasticity = stdJson.readUint(_json, "$.eip1559Elasticity");
