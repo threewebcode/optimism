@@ -41,6 +41,7 @@ contract GasPriceOracleBedrock_Test is GasPriceOracle_Test {
         // The gasPriceOracle tests rely on an L2 genesis that is not past Ecotone.
         l2OutputMode = OutputMode.LOCAL_DELTA;
         super.setUp();
+        assertEq(gasPriceOracle.isEcotone(), false);
 
         vm.prank(depositor);
         l1Block.setL1BlockValues({
@@ -112,7 +113,9 @@ contract GasPriceOracleBedrock_Test is GasPriceOracle_Test {
 contract GasPriceOracleEcotone_Test is GasPriceOracle_Test {
     /// @dev Sets up the test suite.
     function setUp() public virtual override {
+        l2OutputMode = OutputMode.LOCAL_LATEST; // activate ecotone
         super.setUp();
+        assertEq(gasPriceOracle.isEcotone(), true);
 
         bytes memory calldataPacked = Encoding.encodeSetL1BlockValuesEcotone(
             baseFeeScalar, blobBaseFeeScalar, sequenceNumber, timestamp, number, baseFee, blobBaseFee, hash, batcherHash
@@ -122,9 +125,6 @@ contract GasPriceOracleEcotone_Test is GasPriceOracle_Test {
         vm.prank(depositor);
         (bool success,) = address(l1Block).call(calldataPacked);
         require(success, "Function call failed");
-
-        vm.prank(depositor);
-        gasPriceOracle.setEcotone();
     }
 
     /// @dev Tests that `setEcotone` is only callable by the depositor.

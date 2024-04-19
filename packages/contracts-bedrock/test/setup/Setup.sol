@@ -175,7 +175,7 @@ contract Setup {
 
     /// @dev Sets up the L2 contracts. Depends on `L1()` being called first.
     function L2() public {
-        console.log("Setup: creating L2 genesis");
+        console.log("Setup: creating L2 genesis, with output mode %d", uint256(l2OutputMode));
         l2Genesis.runWithOptions(
             l2OutputMode,
             L1Dependencies({

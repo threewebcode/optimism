@@ -54,7 +54,9 @@ contract PreinstallsTest is CommonTest {
         assertEq(_addr.code, _code, "equal code must be deployed");
         assertEq(Preinstalls.getDeployedCode(_addr, block.chainid), _code, "deployed-code getter must match");
         assertNotEq(Preinstalls.getName(_addr), "", "must have a name");
-        assertEq(vm.getNonce(_addr), 1, "preinstall account must have 1 nonce");
+        if (_addr != Preinstalls.DeterministicDeploymentProxy) {
+            assertEq(vm.getNonce(_addr), 1, "preinstall account must have 1 nonce");
+        }
     }
 
     function test_preinstall_multicall3_succeeds() external view {
